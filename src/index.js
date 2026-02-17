@@ -29,7 +29,7 @@ class OpenClawWorkspace {
     // Connect to cloud service
     const connected = await this.cloudService.connect();
     if (!connected) {
-      throw new Error('Failed to connect to OpenClaw cloud service');
+      console.warn('Running in offline mode - cloud features will be unavailable');
     }
     
     console.log('OpenClaw Workspace initialized successfully');
@@ -47,6 +47,10 @@ class OpenClawWorkspace {
    * Sync with cloud service
    */
   async syncWithCloud() {
+    if (!this.cloudService.isConnected()) {
+      console.warn('Not connected to cloud service - skipping sync');
+      return { success: false, error: 'Not connected' };
+    }
     return this.cloudService.sync();
   }
 
