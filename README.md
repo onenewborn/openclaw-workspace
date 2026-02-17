@@ -32,6 +32,21 @@ Edit `.env` with your configuration:
 
 ## Usage
 
+### Running Tests
+
+Run the comprehensive test suite:
+
+```bash
+node examples/comprehensive-test.js
+```
+
+This will test:
+- Offline mode functionality
+- Online mode with cloud connection
+- Version management
+- Cloud synchronization (both online and offline)
+- Graceful error handling
+
 ### As a CLI Tool
 
 Run the workspace directly:
@@ -113,7 +128,11 @@ Manages code versions for openclaw projects:
 
 ## Examples
 
-See the `examples/` directory for usage examples.
+See the `examples/` directory for usage examples:
+
+- `basic-usage.js` - Basic workspace operations
+- `version-management.js` - Version management features
+- `comprehensive-test.js` - Full test suite demonstrating all features
 
 ## License
 
