@@ -1,0 +1,9 @@
+{
+  "cloudEndpoint": "https://api.openclaw.cloud",
+  "apiKey": "",
+  "versionFile": ".openclaw-version",
+  "syncInterval": 300000,
+  "retryAttempts": 3,
+  "timeout": 30000,
+  "logLevel": "info"
+}

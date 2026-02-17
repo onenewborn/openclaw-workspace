@@ -1,0 +1,20 @@
+{
+  "name": "openclaw-workspace",
+  "version": "1.0.0",
+  "description": "Workspace for managing openclaw code versions and cloud service integration",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "openclaw",
+    "workspace",
+    "version-management",
+    "cloud-integration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
