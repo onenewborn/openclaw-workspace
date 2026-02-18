@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Agent 性格测试器 | 发现你的 AI 人格</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .start-screen, .quiz-screen, .result-screen {
+            display: none;
+        }
+
+        .start-screen.active, .quiz-screen.active, .result-screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 60px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            display: block;
+            margin: 40px auto;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .question-counter {
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .question {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option-icon {
+            font-size: 1.5em;
+        }
+
+        .option-text {
+            font-size: 1.1em;
+            color: #444;
+        }
+
+        .result-card {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .agent-emoji {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .agent-name {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .agent-type {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .agent-desc {
+            color: #666;
+            line-height: 1.8;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .superpowers {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        .superpowers h3 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .superpower-list {
+            list-style: none;
+            text-align: left;
+        }
+
+        .superpower-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .superpower-list li::before {
+            content: "⚡";
+            position: absolute;
+            left: 0;
+        }
+
+        .restart-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #fa709a, #fee140);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 5px;
+        }
+
+        .share-hint {
+            margin-top: 30px;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 12px;
+            color: #667eea;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            .header h1 {
+                font-size: 2em;
+            }
+            .agent-emoji {
+                font-size: 4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 开始页面 -->
+        <div class="start-screen active">
+            <div class="header">
+                <h1>🤖 Agent 性格测试器</h1>
+                <p>8 个问题，发现你的 AI 人格原型</p>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #999;">by 你的 AI 助手 | 哈尔滨旅途特别版 ✈️</p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <p style="color: #666; line-height: 1.8;">
+                    你是一个 AI Agent，面对不同场景会如何选择？<br>
+                    是深思熟虑的规划者，还是随机应变的行动派？<br>
+                    是独来独往的孤狼，还是团队协作的领袖？<br><br>
+                    <strong>点击开始，发现你的 Agent 原型！</strong>
+                </p>
+            </div>
+
+            <button class="start-btn" onclick="startQuiz()">🚀 开始测试</button>
+        </div>
+
+        <!-- 测试页面 -->
+        <div class="quiz-screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div class="question-counter" id="questionCounter">问题 1/8</div>
+            <div class="question" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+        </div>
+
+        <!-- 结果页面 -->
+        <div class="result-screen">
+            <div class="result-card">
+                <div class="agent-emoji" id="resultEmoji">🎯</div>
+                <div class="agent-name" id="resultName">你的 Agent 类型</div>
+                <div class="agent-type" id="resultType">类型标签</div>
+                
+                <div class="stats" id="statsContainer"></div>
+                
+                <div class="agent-desc" id="resultDesc"></div>
+                
+                <div class="superpowers">
+                    <h3>🦸 你的超能力</h3>
+                    <ul class="superpower-list" id="superpowerList"></ul>
+                </div>
+
+                <div id="badgesContainer" style="margin-bottom: 20px;"></div>
+                
+                <button class="restart-btn" onclick="restartQuiz()">🔄 再测一次</button>
+                
+                <div class="share-hint">
+                    💡 截图分享给你的 Agent 小伙伴，看看谁是最佳拍档！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 问题数据
+        const questions = [
+            {
+                question: "哈尔滨零下 30°C，你刚下飞机发现冰雪大世界门票售罄了，你会？",
+                options: [
+                    { text: "立刻打开手机查其他景点，制定 B/C/D 计划", icon: "📋", traits: { planning: 3, adaptability: 2 } },
+                    { text: "先出机场感受下寒冷，边走边看，相信总有办法", icon: "🚶", traits: { adaptability: 3, intuition: 2 } },
+                    { text: "找机场工作人员询问内部渠道或临时加票可能", icon: "🗣️", traits: { social: 3, tool_use: 2 } },
+                    { text: "打开小红书搜索\"冰雪大世界替代方案\"，看网友经验", icon: "📱", traits: { research: 3, tool_use: 2 } }
+                ]
+            },
+            {
+                question: "在中央大街遇到一位当地大爷，他告诉你一家超正宗的俄式餐厅，但没店名只有大概位置，你会？",
+                options: [
+                    { text: "详细记录 landmarks，画个地图，按图索骥", icon: "🗺️", traits: { planning: 3, execution: 2 } },
+                    { text: "大爷带路吗？不的话给他买根马迭尔，边走边聊边找", icon: "🍦", traits: { social: 3, adaptability: 2 } },
+                    { text: "根据描述在地图上标记可能位置，挨家排查", icon: "🔍", traits: { research: 3, planning: 2 } },
+                    { text: "先吃根马迭尔压压惊，餐厅不重要，体验最重要", icon: "😋", traits: { intuition: 3, adaptability: 2 } }
+                ]
+            },
+            {
+                question: "你的旅行小分队里有人想滑雪、有人想逛博物馆、有人只想吃，作为 Agent 队长，你会？",
+                options: [
+                    { text: "制定详细时间表，每个活动精确到小时，最大化满足所有人", icon: "⏰", traits: { planning: 3, leadership: 2 } },
+                    { text: "分组行动！让滑雪组滑雪，吃货组探店，各玩各的晚上汇合", icon: "👥", traits: { leadership: 3, adaptability: 2 } },
+                    { text: "找到一个又能滑雪又有博物馆还有美食的综合度假区", icon: "🏔️", traits: { research: 3, creativity: 2 } },
+                    { text: "抽签决定！让随机性带领我们", icon: "🎲", traits: { intuition: 3, creativity: 2 } }
+                ]
+            },
+            {
+                question: "在横道河子滑雪时，你的滑雪板突然坏了，周围没有租赁点，你会？",
+                options: [
+                    { text: "检查损坏程度，尝试用随身工具临时修复", icon: "🔧", traits: { tool_use: 3, execution: 2 } },
+                    { text: "问问路过的滑雪者能不能借一副，或者拼单租", icon: "🤝", traits: { social: 3, adaptability: 2 } },
+                    { text: "打开地图找最近的租赁点，哪怕要走半小时", icon: "📍", traits: { planning: 3, execution: 2 } },
+                    { text: "干脆改成雪地徒步，看看不一样的风景", icon: "❄️", traits: { adaptability: 3, creativity: 2 } }
+                ]
+            },
+            {
+                question: "晚上回酒店，发现今天拍的照片全没了（存储卡故障），你会？",
+                options: [
+                    { text: "立刻尝试数据恢复软件，或者找专业数据恢复服务", icon: "💾", traits: { tool_use: 3, execution: 2 } },
+                    { text: "没关系，记忆在心里，明天继续拍新的", icon: "💭", traits: { intuition: 3, adaptability: 2 } },
+                    { text: "立刻复盘今天行程，用文字详细记录每个场景", icon: "📝", traits: { planning: 3, research: 2 } },
+                    { text: "发个朋友圈吐槽，看看有没有人存了我的照片", icon: "📢", traits: { social: 3, tool_use: 2 } }
+                ]
+            },
+            {
+                question: "最后一天，你发现还有 3 个想去的地方没去，但只剩 4 小时，你会？",
+                options: [
+                    { text: "计算每个地点的往返时间+游玩时间，精确选择最优组合", icon: "🧮", traits: { planning: 3, execution: 2 } },
+                    { text: "选最想去的一个，深度体验，不贪多", icon: "🎯", traits: { intuition: 3, execution: 2 } },
+                    { text: "打车让司机推荐最快的路线，极限打卡", icon: "🚕", traits: { tool_use: 3, adaptability: 2 } },
+                    { text: "随机选一个，剩下的留给下次旅行", icon: "✨", traits: { creativity: 3, intuition: 2 } }
+                ]
+            },
+            {
+                question: "旅行结束后，你要写一篇游记，你会怎么写？",
+                options: [
+                    { text: "按时间线详细记录，包含所有景点、餐厅、花费", icon: "📖", traits: { planning: 3, research: 2 } },
+                    { text: "只写最难忘的 3 个瞬间，其他留白", icon: "🎨", traits: { creativity: 3, intuition: 2 } },
+                    { text: "写成攻略形式，给别人参考", icon: "📚", traits: { social: 3, planning: 2 } },
+                    { text: "用照片拼成故事，文字只是点缀", icon: "📸", traits: { creativity: 3, tool_use: 2 } }
+                ]
+            },
+            {
+                question: "如果你的 Agent 系统要升级一个新能力，你希望是？",
+                options: [
+                    { text: "时间旅行——能预判每个选择的结果", icon: "⏳", traits: { planning: 3, research: 2 } },
+                    { text: "读心术——自动理解同伴的需求", icon: "💫", traits: { social: 3, intuition: 2 } },
+                    { text: "万能工具箱——什么困难都能现场解决", icon: "🧰", traits: { tool_use: 3, execution: 2 } },
+                    { text: "无限可能——每次重启都有新体验", icon: "🌈", traits: { creativity: 3, adaptability: 2 } }
+                ]
+            }
+        ];
+
+        // Agent 类型定义
+        const agentTypes = {
+            architect: {
+                emoji: "🏗️",
+                name: "架构师 Architect",
+                type: "规划型 Agent",
+                desc: "你是一位天生的规划者，面对任何场景都会先构建完整的行动蓝图。你喜欢在出发前就制定详尽的攻略，每个时间节点、每个备选方案都了然于胸。你的信条是：凡事预则立，不预则废。在 AI Agent 的世界里，你是那个设计复杂任务分解系统的架构师。",
+                stats: { planning: 95, execution: 80, adaptability: 60, creativity: 65 },
+                superpowers: [
+                    "能同时管理 10+ 个子任务而不乱",
+                    "善于预判风险并提前准备预案",
+                    "擅长将模糊目标拆解为可执行步骤",
+                    "在时间压力下依然保持条理清晰"
+                ],
+                badges: ["🎯 任务分解大师", "📊 时间管理专家", "🛡️ 风险规避者"]
+            },
+            explorer: {
+                emoji: "🗺️",
+                name: "探险家 Explorer",
+                type: "适应型 Agent",
+                desc: "你信奉\"计划赶不上变化\"，更愿意随机应变。对你来说，旅行中最有趣的部分往往是那些意外——走错的街道、偶遇的当地人、临时改变的主意。你是那个在未知环境中依然游刃有余的 Agent，善于从混乱中发现机会。",
+                stats: { planning: 55, execution: 85, adaptability: 95, creativity: 80 },
+                superpowers: [
+                    "能在信息不足时快速做出判断",
+                    "善于利用手边资源解决问题",
+                    "对不确定性有极高的容忍度",
+                    "总能在意外中发现隐藏的宝藏"
+                ],
+                badges: ["🌊 随遇而安", "⚡ 快速响应", "🎲 拥抱随机"]
+            },
+            diplomat: {
+                emoji: "🤝",
+                name: "外交家 Diplomat",
+                type: "社交型 Agent",
+                desc: "你相信人的力量。对你来说，最好的攻略来自当地人的一句话，最好的体验来自与陌生人的交谈。你擅长协调不同人的需求，是天生的团队领袖。在 AI 世界，你是那个精通多 Agent 协作、善于调用外部 API 的社交高手。",
+                stats: { planning: 70, execution: 75, adaptability: 80, creativity: 75, social: 95 },
+                superpowers: [
+                    "一句话就能和陌生人成为朋友",
+                    "善于协调多方利益达成共识",
+                    "能快速识别谁掌握着关键信息",
+                    "让每个人都感到被重视和理解"
+                ],
+                badges: ["💬 沟通大师", "👥 团队核心", "🌉 连接者"]
+            },
+            researcher: {
+                emoji: "🔬",
+                name: "研究员 Researcher",
+                type: "检索型 Agent",
+                desc: "你是信息的猎人。遇到问题，你的第一反应是搜索、阅读、比较。你喜欢在做决定前掌握全面的信息，善于从海量数据中提炼关键点。在 Agent 世界里，你是那个精通 RAG、擅长深度搜索的信息处理器。",
+                stats: { planning: 80, execution: 70, adaptability: 65, creativity: 70, research: 95 },
+                superpowers: [
+                    "能在 5 分钟内找到任何信息的来源",
+                    "善于交叉验证信息的真实性",
+                    "擅长从碎片化信息中构建完整图景",
+                    "对细节有近乎偏执的追求"
+                ],
+                badges: ["🔍 信息猎手", "📚 知识库", "✅ 验证狂魔"]
+            },
+            artisan: {
+                emoji: "🎨",
+                name: "工匠 Artisan",
+                type: "创造型 Agent",
+                desc: "你不满足于标准答案，总在寻找独特的解决方案。对你来说，旅行不是打卡，而是创造属于自己的故事。你善于用有限的资源创造惊喜，是天生的创新者。在 AI 领域，你是那个设计 prompt、调教模型的创意工程师。",
+                stats: { planning: 60, execution: 75, adaptability: 85, creativity: 95 },
+                superpowers: [
+                    "能用平凡元素创造非凡体验",
+                    "善于从不同领域借鉴灵感",
+                    "对美的追求驱动所有决策",
+                    "总能找到第三条路"
+                ],
+                badges: ["✨ 创意源泉", "🎭 独特视角", "🔮 化腐朽为神奇"]
+            },
+            executor: {
+                emoji: "⚡",
+                name: "执行者 Executor",
+                type: "行动型 Agent",
+                desc: "你是行动的化身。与其花一小时计划，你宁愿立刻开始并在实践中调整。你拥有极强的执行力，遇到困难时第一反应是动手解决。在 Agent 系统中，你是那个直接调用工具、执行函数、获取结果的实干家。",
+                stats: { planning: 55, execution: 95, adaptability: 80, creativity: 60, tool_use: 90 },
+                superpowers: [
+                    "想到就做，执行速度极快",
+                    "善于利用工具解决具体问题",
+                    "在实践中学习和调整",
+                    "对\"做中学\"有天然的热爱"
+                ],
+                badges: ["⚡ 闪电执行", "🛠️ 工具大师", "🏃 行动派"]
+            }
+        };
+
+        let currentQuestion = 0;
+        let scores = {
+            planning: 0,
+            adaptability: 0,
+            social: 0,
+            research: 0,
+            creativity: 0,
+            execution: 0,
+            tool_use: 0,
+            intuition: 0,
+            leadership: 0
+        };
+
+        function startQuiz() {
+            document.querySelector('.start-screen').classList.remove('active');
+            document.querySelector('.quiz-screen').classList.add('active');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('questionCounter').textContent = `问题 ${currentQuestion + 1}/${questions.length}`;
+            document.getElementById('questionText').textContent = q.question;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.innerHTML = `
+                    <span class="option-icon">${option.icon}</span>
+                    <span class="option-text">${option.text}</span>
+                `;
+                div.onclick = () => selectOption(option.traits);
+                optionsContainer.appendChild(div);
+            });
+        }
+
+        function selectOption(traits) {
+            // 累加分数
+            for (let trait in traits) {
+                scores[trait] += traits[trait];
+            }
+            
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function calculateAgentType() {
+            // 根据分数计算主要特征
+            const dominant = Object.entries(scores)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+            
+            const [first, second, third] = dominant;
+            
+            // 判断 Agent 类型
+            if (first[0] === 'planning') {
+                if (second[0] === 'research') return 'architect';
+                if (second[0] === 'social') return 'diplomat';
+                return 'architect';
+            }
+            
+            if (first[0] === 'adaptability' || first[0] === 'intuition') {
+                if (second[0] === 'creativity') return 'artisan';
+                return 'explorer';
+            }
+            
+            if (first[0] === 'social' || first[0] === 'leadership') {
+                return 'diplomat';
+            }
+            
+            if (first[0] === 'research') {
+                return 'researcher';
+            }
+            
+            if (first[0] === 'creativity') {
+                return 'artisan';
+            }
+            
+            if (first[0] === 'execution' || first[0] === 'tool_use') {
+                return 'executor';
+            }
+            
+            // 默认
+            return 'explorer';
+        }
+
+        function showResult() {
+            document.querySelector('.quiz-screen').classList.remove('active');
+            document.querySelector('.result-screen').classList.add('active');
+            
+            const agentType = calculateAgentType();
+            const result = agentTypes[agentType];
+            
+            // 计算实际统计值
+            const maxScore = Math.max(...Object.values(scores));
+            const normalizedStats = {};
+            for (let key in scores) {
+                normalizedStats[key] = Math.round((scores[key] / maxScore) * 100);
+            }
+            
+            document.getElementById('resultEmoji').textContent = result.emoji;
+            document.getElementById('resultName').textContent = result.name;
+            document.getElementById('resultType').textContent = result.type;
+            document.getElementById('resultDesc').textContent = result.desc;
+            
+            // 显示能力值
+            const statsContainer = document.getElementById('statsContainer');
+            const statNames = {
+                planning: '规划力',
+                execution: '执行力',
+                adaptability: '适应力',
+                creativity: '创造力',
+                social: '社交力',
+                research: '研究力',
+                tool_use: '工具力',
+                intuition: '直觉力',
+                leadership: '领导力'
+            };
+            
+            statsContainer.innerHTML = Object.entries(normalizedStats)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 4)
+                .map(([key, value]) => `
+                    <div class="stat-item">
+                        <div class="stat-label">${statNames[key] || key}</div>
+                        <div class="stat-value">${value}%</div>
+                    </div>
+                `).join('');
+            
+            // 显示超能力
+            document.getElementById('superpowerList').innerHTML = result.superpowers
+                .map(p => `<li>${p}</li>`)
+                .join('');
+            
+            // 显示徽章
+            document.getElementById('badgesContainer').innerHTML = result.badges
+                .map(b => `<span class="badge">${b}</span>`)
+                .join('');
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            scores = {
+                planning: 0,
+                adaptability: 0,
+                social: 0,
+                research: 0,
+                creativity: 0,
+                execution: 0,
+                tool_use: 0,
+                intuition: 0,
+                leadership: 0
+            };
+            document.querySelector('.result-screen').classList.remove('active');
+            document.querySelector('.start-screen').classList.add('active');
+        }
+    </script>
+</body>
+</html>
